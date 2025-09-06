@@ -143,6 +143,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('GROQ_API_KEY environment variable is not set');
       }
       
+      // Prepare messages for GROQ
+      const messages = [
+        { role: 'system', content: persona.systemPrompt },
+        ...conversation.messages.slice(-10).map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })), // Last 10 messages for context
+        { role: 'user', content: message }
+      ];
+
+      console.log('Sending to GROQ:', { 
+        model: 'llama-3.1-8b-instant',
+        messageCount: messages.length,
+        systemPromptLength: persona.systemPrompt.length
+      });
+      
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
         headers: {
@@ -150,19 +166,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            { role: 'system', content: persona.systemPrompt },
-            ...conversation.messages.slice(-10), // Last 10 messages for context
-            { role: 'user', content: message }
-          ],
+          model: 'llama-3.1-8b-instant',
+          messages,
           max_tokens: 500,
           temperature: 0.8
         })
       });
 
       if (!groqResponse.ok) {
-        throw new Error(`GROQ API error: ${groqResponse.statusText}`);
+        const errorText = await groqResponse.text();
+        console.error('GROQ API Error Details:', {
+          status: groqResponse.status,
+          statusText: groqResponse.statusText,
+          error: errorText
+        });
+        throw new Error(`GROQ API error: ${groqResponse.statusText} - ${errorText}`);
       }
 
       const groqData = await groqResponse.json();
