@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { Plus, MessageCircle, Sparkles, Heart } from "lucide-react";
+import { Plus, MessageCircle, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import influbeeLogoUrl from "@assets/image_1757157742402.png";
 import type { Persona } from "@shared/schema";
 
 export default function PersonaList() {
@@ -48,9 +49,13 @@ export default function PersonaList() {
       <div className="container mx-auto px-4 py-6 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <Heart className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold text-foreground">InfluBee</h1>
+          <div className="flex items-center justify-center mb-4">
+            <img 
+              src={influbeeLogoUrl} 
+              alt="InfluBee" 
+              className="h-16 w-auto"
+              data-testid="influbee-logo"
+            />
           </div>
           <p className="text-muted-foreground">
             Your AI influencer companions await you

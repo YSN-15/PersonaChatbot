@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRoute } from "wouter";
-import { ArrowLeft, Send, Heart, Sparkles } from "lucide-react";
+import { useRoute, useLocation } from "wouter";
+import { ArrowLeft, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { createConversation, sendMessage } from "@/lib/groq";
+import influbeeLogoUrl from "@assets/image_1757157742402.png";
 import type { Persona, Conversation } from "@shared/schema";
 
 export default function Chat() {
   const [, params] = useRoute("/chat/:id");
+  const [, setLocation] = useLocation();
   const personaId = params?.id;
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -158,7 +160,7 @@ export default function Chat() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => window.history.back()}
+            onClick={() => setLocation("/")}
             className="p-2"
             data-testid="button-back-to-creator"
           >
@@ -168,7 +170,12 @@ export default function Chat() {
             <h1 className="font-semibold text-foreground">{persona.name}</h1>
             <p className="text-sm text-muted-foreground">{persona.role}</p>
           </div>
-          <Heart className="h-5 w-5 text-primary" />
+          <img 
+            src={influbeeLogoUrl} 
+            alt="InfluBee" 
+            className="h-6 w-auto opacity-80"
+            data-testid="influbee-logo-chat"
+          />
         </div>
       </div>
 

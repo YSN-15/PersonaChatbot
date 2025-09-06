@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProgressBar } from "@/components/ui/progress-bar";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import influbeeLogoUrl from "@assets/image_1757157742402.png";
 import Step1Description from "@/components/persona/step1-description";
 import Step2Personality from "@/components/persona/step2-personality";
 import Step3Introduction from "@/components/persona/step3-introduction";
@@ -63,6 +64,8 @@ export default function PersonaCreator() {
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+    } else {
+      setLocation("/"); // Go back to home page
     }
   };
 
@@ -137,20 +140,24 @@ export default function PersonaCreator() {
     <div className="min-h-screen gradient-bg">
       <div className="container mx-auto px-4 py-6 max-w-md">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <Button
             variant="ghost"
             size="sm"
             onClick={prevStep}
-            disabled={currentStep === 1}
             className="p-2 hover:bg-secondary rounded-lg transition-colors"
             data-testid="button-back"
           >
             <ArrowLeft className="h-5 w-5 text-foreground" />
           </Button>
-          <h1 className="text-xl font-semibold text-center flex-1">
-            Create AI Persona
-          </h1>
+          <div className="flex-1 flex justify-center">
+            <img 
+              src={influbeeLogoUrl} 
+              alt="InfluBee" 
+              className="h-8 w-auto"
+              data-testid="influbee-logo-small"
+            />
+          </div>
           <div className="w-10" /> {/* Spacer for centering */}
         </div>
 
