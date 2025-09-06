@@ -4,13 +4,15 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
+import PersonaList from "@/pages/persona-list";
 import PersonaCreator from "@/pages/persona-creator";
 import Chat from "@/pages/chat";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={PersonaCreator} />
+      <Route path="/" component={PersonaList} />
+      <Route path="/create" component={PersonaCreator} />
       <Route path="/chat/:id" component={Chat} />
       <Route component={NotFound} />
     </Switch>

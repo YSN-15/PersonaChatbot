@@ -10,6 +10,7 @@ export interface IStorage {
   createPersona(persona: InsertPersona): Promise<Persona>;
   getPersona(id: string): Promise<Persona | undefined>;
   getPersonasByUser(userId: string): Promise<Persona[]>;
+  getAllPersonas(): Promise<Persona[]>;
   updatePersona(id: string, persona: Partial<InsertPersona>): Promise<Persona | undefined>;
   
   createConversation(conversation: InsertConversation): Promise<Conversation>;
@@ -56,6 +57,10 @@ export class DatabaseStorage implements IStorage {
 
   async getPersonasByUser(userId: string): Promise<Persona[]> {
     return await db.select().from(aiPersonas).where(eq(aiPersonas.userId, userId));
+  }
+
+  async getAllPersonas(): Promise<Persona[]> {
+    return await db.select().from(aiPersonas);
   }
 
   async updatePersona(id: string, updates: Partial<InsertPersona>): Promise<Persona | undefined> {

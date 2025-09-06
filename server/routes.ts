@@ -88,6 +88,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get all personas (temporary route for demo without auth)
+  app.get("/api/personas/all", async (req, res) => {
+    try {
+      // Since we don't have user auth yet, return all personas
+      // In a real app, this would be filtered by user
+      const personas = await storage.getAllPersonas();
+      res.json(personas);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch personas" });
+    }
+  });
+
   // Create conversation
   app.post("/api/conversations", async (req, res) => {
     try {
