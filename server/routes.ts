@@ -138,7 +138,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Call GROQ API
-      const groqApiKey = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_ENV_VAR || "default_key";
+      const groqApiKey = process.env.GROQ_API_KEY;
+      if (!groqApiKey) {
+        throw new Error('GROQ_API_KEY environment variable is not set');
+      }
       
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
         method: 'POST',
@@ -147,7 +150,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: 'llama-3.1-70b-versatile',
+          model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: persona.systemPrompt },
             ...conversation.messages.slice(-10), // Last 10 messages for context

@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Persona, type InsertPersona, type Conversation, type InsertConversation } from "@shared/schema";
-import { randomUUID } from "crypto";
+import { users, aiPersonas, conversations, type User, type InsertUser, type Persona, type InsertPersona, type Conversation, type InsertConversation } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
@@ -17,99 +18,90 @@ export interface IStorage {
   updateConversation(id: string, messages: Array<{role: 'user' | 'assistant', content: string, timestamp: string}>): Promise<Conversation | undefined>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<string, User>;
-  private personas: Map<string, Persona>;
-  private conversations: Map<string, Conversation>;
-
-  constructor() {
-    this.users = new Map();
-    this.personas = new Map();
-    this.conversations = new Map();
-  }
-
+export class DatabaseStorage implements IStorage {
   async getUser(id: string): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = randomUUID();
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
+    const [user] = await db
+      .insert(users)
+      .values(insertUser)
+      .returning();
     return user;
   }
 
   async createPersona(insertPersona: InsertPersona): Promise<Persona> {
-    const id = randomUUID();
-    const persona: Persona = { 
-      ...insertPersona, 
-      id,
-      createdAt: new Date()
-    };
-    this.personas.set(id, persona);
+    const [persona] = await db
+      .insert(aiPersonas)
+      .values({
+        ...insertPersona,
+        traits: insertPersona.traits as string[],
+        icebreakers: insertPersona.icebreakers as string[]
+      })
+      .returning();
     return persona;
   }
 
   async getPersona(id: string): Promise<Persona | undefined> {
-    return this.personas.get(id);
+    const [persona] = await db.select().from(aiPersonas).where(eq(aiPersonas.id, id));
+    return persona || undefined;
   }
 
   async getPersonasByUser(userId: string): Promise<Persona[]> {
-    return Array.from(this.personas.values()).filter(
-      (persona) => persona.userId === userId
-    );
+    return await db.select().from(aiPersonas).where(eq(aiPersonas.userId, userId));
   }
 
   async updatePersona(id: string, updates: Partial<InsertPersona>): Promise<Persona | undefined> {
-    const persona = this.personas.get(id);
-    if (!persona) return undefined;
+    const updateData: any = { ...updates };
+    if (updates.traits) updateData.traits = updates.traits as string[];
+    if (updates.icebreakers) updateData.icebreakers = updates.icebreakers as string[];
     
-    const updatedPersona = { ...persona, ...updates };
-    this.personas.set(id, updatedPersona);
-    return updatedPersona;
+    const [persona] = await db
+      .update(aiPersonas)
+      .set(updateData)
+      .where(eq(aiPersonas.id, id))
+      .returning();
+    return persona || undefined;
   }
 
   async createConversation(insertConversation: InsertConversation): Promise<Conversation> {
-    const id = randomUUID();
-    const now = new Date();
-    const conversation: Conversation = { 
-      ...insertConversation, 
-      id,
-      createdAt: now,
-      updatedAt: now
-    };
-    this.conversations.set(id, conversation);
+    const [conversation] = await db
+      .insert(conversations)
+      .values({
+        ...insertConversation,
+        messages: insertConversation.messages as Array<{role: 'user' | 'assistant', content: string, timestamp: string}>
+      })
+      .returning();
     return conversation;
   }
 
   async getConversation(id: string): Promise<Conversation | undefined> {
-    return this.conversations.get(id);
+    const [conversation] = await db.select().from(conversations).where(eq(conversations.id, id));
+    return conversation || undefined;
   }
 
   async getConversationsByPersona(personaId: string): Promise<Conversation[]> {
-    return Array.from(this.conversations.values()).filter(
-      (conversation) => conversation.personaId === personaId
-    );
+    return await db.select().from(conversations).where(eq(conversations.personaId, personaId));
   }
 
   async updateConversation(id: string, messages: Array<{role: 'user' | 'assistant', content: string, timestamp: string}>): Promise<Conversation | undefined> {
-    const conversation = this.conversations.get(id);
-    if (!conversation) return undefined;
-    
-    const updatedConversation = { 
-      ...conversation, 
-      messages,
-      updatedAt: new Date()
-    };
-    this.conversations.set(id, updatedConversation);
-    return updatedConversation;
+    const [conversation] = await db
+      .update(conversations)
+      .set({ 
+        messages,
+        updatedAt: new Date()
+      })
+      .where(eq(conversations.id, id))
+      .returning();
+    return conversation || undefined;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
