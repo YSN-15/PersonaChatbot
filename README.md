@@ -1,8 +1,5 @@
-# InfluBee 🐝 - AI Influencer Persona Creation Platform
+ AI Influencer Persona Creation Platform
 
-![InfluBee Logo](./attached_assets/image_1757157742402.png)
-
-**InfluBee** is a full-stack web application that enables users to create and interact with custom AI influencer personas. Build seductive, flirty AI companions that communicate in Hindi-English mixed language for engaging romantic conversations.
 
 ## ✨ Features
 
