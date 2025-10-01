@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, json, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, json, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -30,6 +30,8 @@ export const conversations = pgTable("conversations", {
   personaId: varchar("persona_id").references(() => aiPersonas.id).notNull(),
   userId: varchar("user_id").references(() => users.id),
   messages: json("messages").$type<Array<{role: 'user' | 'assistant', content: string, timestamp: string}>>().notNull(),
+  conversationSummary: text("conversation_summary"),
+  lastSummarizedAt: integer("last_summarized_at").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
