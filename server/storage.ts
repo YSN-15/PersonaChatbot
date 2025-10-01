@@ -17,6 +17,7 @@ export interface IStorage {
   getConversation(id: string): Promise<Conversation | undefined>;
   getConversationsByPersona(personaId: string): Promise<Conversation[]>;
   updateConversation(id: string, messages: Array<{role: 'user' | 'assistant', content: string, timestamp: string}>): Promise<Conversation | undefined>;
+  updateConversationSummary(id: string, summary: string, lastSummarizedAt: number): Promise<Conversation | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -101,6 +102,19 @@ export class DatabaseStorage implements IStorage {
       .update(conversations)
       .set({ 
         messages,
+        updatedAt: new Date()
+      })
+      .where(eq(conversations.id, id))
+      .returning();
+    return conversation || undefined;
+  }
+
+  async updateConversationSummary(id: string, summary: string, lastSummarizedAt: number): Promise<Conversation | undefined> {
+    const [conversation] = await db
+      .update(conversations)
+      .set({ 
+        conversationSummary: summary,
+        lastSummarizedAt,
         updatedAt: new Date()
       })
       .where(eq(conversations.id, id))

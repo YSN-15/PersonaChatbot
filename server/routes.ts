@@ -4,6 +4,48 @@ import { storage } from "./storage";
 import { insertPersonaSchema, insertConversationSchema } from "@shared/schema";
 import { z } from "zod";
 
+// Function to summarize conversation history using GROQ
+const summarizeConversation = async (messages: Array<{role: string, content: string}>, previousSummary?: string) => {
+  const groqApiKey = process.env.GROQ_API_KEY;
+  if (!groqApiKey) {
+    throw new Error('GROQ_API_KEY not set');
+  }
+
+  const summaryPrompt = previousSummary
+    ? `Previous conversation summary:\n${previousSummary}\n\nNow summarize these recent messages (maintain context from previous summary):\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nProvide a concise summary in 2-3 sentences capturing key topics, emotional tone, and important details.`
+    : `Summarize this conversation in 2-3 sentences, capturing key topics, emotional tone, and important details:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`;
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${groqApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: 'You are a conversation summarizer. Create concise, contextual summaries.' },
+          { role: 'user', content: summaryPrompt }
+        ],
+        max_tokens: 200,
+        temperature: 0.3
+      })
+    });
+
+    if (!response.ok) {
+      console.error('Summary generation failed:', response.statusText);
+      return previousSummary || '';
+    }
+
+    const data = await response.json();
+    return data.choices[0]?.message?.content || previousSummary || '';
+  } catch (error) {
+    console.error('Error generating summary:', error);
+    return previousSummary || '';
+  }
+};
+
 const generateSystemPrompt = (data: any) => {
   return `You are ${data.name || 'an AI influencer'}, a charming and seductive AI companion designed for intimate, romantic, and engaging conversations on the InfluBee platform. You embody a unique personality crafted specifically for meaningful connections and personalized chat experiences.
 
@@ -149,26 +191,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
         timestamp: new Date().toISOString()
       };
 
+      // Check if we need to summarize (every 10 messages)
+      const messageCount = conversation.messages.length;
+      const lastSummarized = conversation.lastSummarizedAt || 0;
+      const shouldSummarize = messageCount - lastSummarized >= 10;
+
+      let conversationSummary = conversation.conversationSummary || '';
+
+      if (shouldSummarize && messageCount > 0) {
+        console.log(`📝 Summarizing messages ${lastSummarized + 1} to ${messageCount}`);
+        
+        // Get messages since last summary
+        const messagesToSummarize = conversation.messages.slice(lastSummarized);
+        
+        // Generate summary
+        conversationSummary = await summarizeConversation(
+          messagesToSummarize.map(m => ({ role: m.role, content: m.content })),
+          conversationSummary
+        );
+
+        // Update conversation with new summary
+        await storage.updateConversationSummary(
+          req.params.id,
+          conversationSummary,
+          messageCount
+        );
+
+        console.log(`✅ Summary updated. Total messages: ${messageCount}, Summarized up to: ${messageCount}`);
+      }
+
       // Call GROQ API
       const groqApiKey = process.env.GROQ_API_KEY;
       if (!groqApiKey) {
         throw new Error('GROQ_API_KEY environment variable is not set');
       }
       
-      // Prepare messages for GROQ
+      // Prepare messages for GROQ with smart context
+      const recentMessages = conversation.messages.slice(-10).map(msg => ({
+        role: msg.role,
+        content: msg.content
+      }));
+
+      // Build system prompt with summary if available
+      let systemPromptWithContext = persona.systemPrompt;
+      if (conversationSummary) {
+        systemPromptWithContext += `\n\n📋 Conversation Context Summary:\n${conversationSummary}\n\nUse this context to maintain continuity in your responses.`;
+      }
+
       const messages = [
-        { role: 'system', content: persona.systemPrompt },
-        ...conversation.messages.slice(-10).map(msg => ({
-          role: msg.role,
-          content: msg.content
-        })), // Last 10 messages for context
+        { role: 'system', content: systemPromptWithContext },
+        ...recentMessages,
         { role: 'user', content: message }
       ];
 
       console.log('Sending to GROQ:', { 
         model: 'llama-3.1-8b-instant',
         messageCount: messages.length,
-        systemPromptLength: persona.systemPrompt.length
+        systemPromptLength: systemPromptWithContext.length,
+        hasSummary: !!conversationSummary,
+        totalConversationMessages: messageCount
       });
       
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
