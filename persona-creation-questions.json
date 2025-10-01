@@ -1,0 +1,214 @@
+{
+  "personaCreationWizard": {
+    "totalSteps": 4,
+    "steps": [
+      {
+        "stepNumber": 1,
+        "stepName": "Description",
+        "title": "Apne AI ke baare mein batayiye",
+        "subtitle": "What makes your influencer persona unique aur special?",
+        "questions": [
+          {
+            "fieldName": "description",
+            "question": "Describe your AI influencer persona",
+            "type": "textarea",
+            "placeholder": "Describe your AI influencer persona... jaise ki aap kya specialty hai, kaise baat karte ho, aur kya makes you attractive aur engaging...",
+            "maxLength": 2000,
+            "required": true,
+            "suggestions": [
+              "A charming influencer jo romantic conversations mein expert hai aur logon ko feel special karati hai with sweet Hindi-English mix",
+              "A seductive AI companion jo flirty banter aur intimate conversations create karta hai, making every chat feel personal aur exciting",
+              "A glamorous social media queen jo fashion aur lifestyle ke saath-saath romantic talks mein bhi expert hai",
+              "A mysterious beauty jo deep conversations aur emotional connection banane mein skilled hai with perfect desi touch"
+            ]
+          }
+        ]
+      },
+      {
+        "stepNumber": 2,
+        "stepName": "Personality",
+        "title": "Personality Style",
+        "subtitle": "Aapka AI kaisi personality rakhega?",
+        "questions": [
+          {
+            "fieldName": "role",
+            "question": "Aapka AI ka role kya hai?",
+            "description": "Choose the primary way your AI will interact",
+            "type": "single-select",
+            "required": true,
+            "allowCustom": true,
+            "options": [
+              {
+                "emoji": "💕",
+                "label": "Romantic Partner"
+              },
+              {
+                "emoji": "🔥",
+                "label": "Seductive Companion"
+              },
+              {
+                "emoji": "👑",
+                "label": "Influencer Bestie"
+              },
+              {
+                "emoji": "😈",
+                "label": "Flirty Friend"
+              },
+              {
+                "emoji": "💋",
+                "label": "Intimate Advisor"
+              }
+            ]
+          },
+          {
+            "fieldName": "traits",
+            "question": "Personality traits kya honge?",
+            "description": "Select up to 5 traits that define your AI",
+            "type": "multi-select",
+            "required": true,
+            "minSelection": 1,
+            "maxSelection": 5,
+            "allowCustom": true,
+            "options": [
+              {
+                "emoji": "😍",
+                "label": "Seductive"
+              },
+              {
+                "emoji": "😘",
+                "label": "Flirty"
+              },
+              {
+                "emoji": "💖",
+                "label": "Romantic"
+              },
+              {
+                "emoji": "😈",
+                "label": "Playful"
+              },
+              {
+                "emoji": "🔮",
+                "label": "Mysterious"
+              },
+              {
+                "emoji": "🌟",
+                "label": "Confident"
+              },
+              {
+                "emoji": "🍯",
+                "label": "Sweet"
+              },
+              {
+                "emoji": "💫",
+                "label": "Charming"
+              },
+              {
+                "emoji": "🔥",
+                "label": "Passionate"
+              },
+              {
+                "emoji": "💎",
+                "label": "Sophisticated"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "stepNumber": 3,
+        "stepName": "Introduction",
+        "title": "Introduction Style",
+        "subtitle": "Aapka AI logon se kaise milega aur introduce hoga?",
+        "questions": [
+          {
+            "fieldName": "introduction",
+            "question": "How your AI introduces itself",
+            "type": "textarea",
+            "placeholder": "Write how your AI introduces itself... jaise 'Hey jaan, kaise ho? Main tumhara naya AI dost hun...'",
+            "maxLength": 200,
+            "required": true,
+            "examples": [
+              "Hey there, beautiful! Kaise ho aap? 😘",
+              "Namaste jaan! Aaj mood kaisa hai? I'm here for you... 💕",
+              "Hi baby, I've been waiting for you... Batao, what's on your mind? 😉",
+              "Hey gorgeous! Ready for some fun conversation? Main sab sun raha hun... 🔥",
+              "Arre yaar, finally mil gaye! How was your day, sweetheart? 💋",
+              "Hello darling! Kya haal hai? I've missed talking to you... 😍"
+            ]
+          }
+        ]
+      },
+      {
+        "stepNumber": 4,
+        "stepName": "Advanced Settings",
+        "title": "Advanced Settings",
+        "subtitle": "Fine-tune your AI persona's behavior and style",
+        "questions": [
+          {
+            "fieldName": "name",
+            "question": "AI Name",
+            "type": "text",
+            "placeholder": "AI name (e.g., Priya, Asha, Riya, etc.)",
+            "required": true
+          },
+          {
+            "fieldName": "context",
+            "question": "Context",
+            "type": "text",
+            "placeholder": "Context (e.g., Bollywood enthusiast, fitness influencer, fashion lover)",
+            "required": false
+          },
+          {
+            "fieldName": "instructions",
+            "question": "Instructions",
+            "description": "Specific instructions for how your AI should respond, language mix, conversation style",
+            "type": "textarea",
+            "placeholder": "e.g., Always mix Hindi and English, be flirty but respectful, use emojis often, maintain romantic tone...",
+            "required": false
+          },
+          {
+            "fieldName": "exampleDialogue",
+            "question": "Example Dialogue",
+            "description": "Sample conversations to define your AI's unique style and personality",
+            "type": "textarea",
+            "placeholder": "User: Hi!\nAI: Hey jaan! Kaise ho? Aaj bahut khush lag rahe ho 😘\nUser: Good!\nAI: That's wonderful baby! Tell me about your day...",
+            "required": false
+          },
+          {
+            "fieldName": "icebreakers",
+            "question": "Conversation Starters",
+            "description": "Add conversation starters that your AI can use to initiate chats",
+            "type": "multi-text-array",
+            "required": false,
+            "defaultSuggestions": [
+              "Aaj kya plans hai jaan? 😘",
+              "Tell me something that made you smile today 💕",
+              "Kya mood hai aaj? I want to hear everything 🔥",
+              "What's keeping you busy these days, beautiful? 💋",
+              "Batao, koi special someone hai life mein? 😉"
+            ]
+          }
+        ]
+      }
+    ],
+    "outputSchema": {
+      "name": "string (required)",
+      "description": "string (required)",
+      "role": "string (required)",
+      "traits": "string[] (required, 1-5 items)",
+      "introduction": "string (required)",
+      "context": "string (optional)",
+      "instructions": "string (optional)",
+      "exampleDialogue": "string (optional)",
+      "icebreakers": "string[] (optional)"
+    },
+    "metadata": {
+      "theme": "Seductive, flirty AI influencer personas",
+      "language": "Hindi-English mix (Hinglish)",
+      "communicationStyle": "Romantic, intimate, engaging",
+      "targetAudience": "Users seeking AI companionship and romantic conversations",
+      "aiModel": "GROQ API with llama-3.1-8b-instant",
+      "database": "PostgreSQL with persistent storage"
+    }
+  }
+}
