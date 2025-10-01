@@ -192,14 +192,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       };
 
       // Check if we need to summarize (every 10 messages)
-      const messageCount = conversation.messages.length;
+      // Each exchange adds 2 messages (user + AI), so we check if we'll have 10+ messages after this exchange
+      const currentMessageCount = conversation.messages.length;
+      const messageCountAfterExchange = currentMessageCount + 2; // user message + AI response
       const lastSummarized = conversation.lastSummarizedAt || 0;
-      const shouldSummarize = messageCount - lastSummarized >= 10;
+      const shouldSummarize = messageCountAfterExchange - lastSummarized >= 10;
 
       let conversationSummary = conversation.conversationSummary || '';
 
-      if (shouldSummarize && messageCount > 0) {
-        console.log(`📝 Summarizing messages ${lastSummarized + 1} to ${messageCount}`);
+      if (shouldSummarize && currentMessageCount > 0) {
+        console.log(`📝 Summarizing messages 1-${currentMessageCount} (will have ${messageCountAfterExchange} after this exchange)`);
         
         // Get messages since last summary
         const messagesToSummarize = conversation.messages.slice(lastSummarized);
@@ -211,13 +213,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
 
         // Update conversation with new summary
+        // Set lastSummarizedAt to the count AFTER this exchange (current + user + AI messages)
         await storage.updateConversationSummary(
           req.params.id,
           conversationSummary,
-          messageCount
+          messageCountAfterExchange
         );
 
-        console.log(`✅ Summary updated. Total messages: ${messageCount}, Summarized up to: ${messageCount}`);
+        console.log(`✅ Summary updated. Summarized ${currentMessageCount} messages. lastSummarizedAt set to ${messageCountAfterExchange}. Next summary at message ${messageCountAfterExchange + 10}.`);
       }
 
       // Call GROQ API
@@ -249,7 +252,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         messageCount: messages.length,
         systemPromptLength: systemPromptWithContext.length,
         hasSummary: !!conversationSummary,
-        totalConversationMessages: messageCount
+        totalConversationMessages: currentMessageCount,
+        willHaveAfterExchange: messageCountAfterExchange
       });
       
       const groqResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
